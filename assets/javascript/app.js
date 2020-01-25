@@ -17,20 +17,13 @@ $(document).ready(function () {
         event.preventDefault();
         
         console.log("HELLO WORLD");
-        var destination = $("#destination").val();
-        var firstTrain = $("#firstTrainTime").val();
-        var frequency = $("#frequency").val();
-        var trainName = $("#trainName").val();
-        console.log(destination, firstTrain, frequency, trainName);
 
-        var employeeObj = {
-            destination: destination,
-            firstTrain: firstTrain,
-            frequency: frequency,
-            trainName: trainName
-        }
-
-        database.ref().push(employeeObj);
+        database.ref().push({
+            destination: $("#destination").val(),
+            firstTrain: $("#firstTrainTime").val(),
+            frequency: $("#frequency").val(),
+            trainName: $("#trainName").val()
+        });
         //   clears all text boxes
         $("#destination").val("");
         $("#firstTrainTime").val("");
@@ -41,35 +34,32 @@ $(document).ready(function () {
 
     database.ref().on("child_added", function (snapshot) {
 
-        var destination = snapshot.val().destination;
-        var firstTrain = snapshot.val().role;
-        var frequency = moment(snapshot.val().frequency);
-        var trainName = snapshot.val().trainName;
-        var formatFrequency = frequency.format("HH:mm");
-        var firstTimeConverted = moment(firstTrain, "HH:mm").subtract(1, "years");
+        var destinationInput = snapshot.val().destination;
+        var firstTrainInput = snapshot.val().firstTrain;
+        var frequencyInput = snapshot.val().frequency;
+        var trainNameInput = snapshot.val().trainName;
+
+        var firstTimeConverted = moment(firstTrainInput, "HH:mm").subtract(1, "years");
         var diffTime = moment().diff(moment(firstTimeConverted), "minutes");
-        var timeRemaining = diffTime % formatFrequency;
-        var tMinutesTillTrain = formatFrequency - timeRemaining;
-    
+
+        var timeRemaining = diffTime % frequencyInput;
+        var tMinutesTillTrain = frequencyInput - timeRemaining;
+
         var nextTrain = moment().add(tMinutesTillTrain, "minutes");
-
-        console.log(formatFrequency);
-        console.log(frequency);
-
+        var formatNextTrain = nextTrain.format("h:mm a");
 
         var tr = $("<tr>");
         tr.append(
-            $("<td>").text(trainName),
-            $("<td>").text(destination),
-            $("<td>").text(formatFrequency),
-            $("<td>").text(moment(nextTrain).format("hh:mm")),
-            $("<td>").text(tMinutesTillTrain),
-            
-            // $("<td>").text(totalBilled),
-        )
+            $("<td>").text(trainNameInput),
+            $("<td>").text(destinationInput),
+            $("<td>").text(frequencyInput),
+            $("<td>").text(formatNextTrain),
+            $("<td>").text(tMinutesTillTrain)
+        );
         $("#tbody").append(tr)
-        console.log(destination, firstTrain, frequency);
+
 
     });
+    console.log(moment());
 
 });
